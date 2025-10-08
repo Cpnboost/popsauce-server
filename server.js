@@ -188,7 +188,9 @@ function levenshtein(a, b) {
 }
 
 /* ===== Lancement ===== */
-server.listen(3000, '0.0.0.0', () => {
-  console.log("🚀 Serveur lancé sur http://localhost:3000");
-  console.log("🌐 Accessible sur le réseau à : http://10.228.124.250:3000");
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Serveur lancé sur le port ${PORT}`);
 });
+
