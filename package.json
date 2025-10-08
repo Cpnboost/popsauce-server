@@ -1,0 +1,14 @@
+{
+  "name": "popsauce",
+  "version": "1.0.0",
+  "description": "Jeu Pop Sauce multijoueur avec tolérance orthographique et synonymes",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "csv-parser": "^3.1.0",
+    "express": "^4.18.2",
+    "socket.io": "^4.8.1"
+  }
+}

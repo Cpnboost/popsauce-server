@@ -1,0 +1,54 @@
+question,answer,synonyms
+Who is considered the father of modern computer science?,Alan Turing,Turing
+AI stands for what?,Artificial Intelligence,AI
+Equation form of simple linear regression?,y = α + βx,y=a+bx;alpha+beta
+What method minimizes the sum of squared residuals?,Ordinary Least Squares,OLS;least squares
+What does R² measure?,Explained Variance,goodness of fit
+What phenomenon describes fitting noise instead of signal?,Overfitting,high variance
+"Fill in the blank: model = LinearRegression().___(X, y)",fit,train
+Which method makes predictions in sklearn models?,predict,forecast;estimate
+Which library provides the function r2_score?,sklearn.metrics,metrics
+Which function calculates R² score in Python?,r2_score,r2
+Which function computes Mean Squared Error?,mean_squared_error,mse
+Which function computes Root Mean Squared Error?,mean_squared_error with sqrt,rmse
+Which Python package is used for data manipulation?,pandas,pd
+Which Python package is used for numerical computation?,numpy,np
+Which Python package is used for plotting?,matplotlib,plt
+Fill in the blank: import pandas as ___,pd,pandas alias
+Fill in the blank: import numpy as ___,np,numpy alias
+Which pandas method reads Excel files?,read_excel,pd.read_excel
+Which pandas method reads CSV files?,read_csv,pd.read_csv
+Which NumPy function returns the mean?,np.mean,mean
+Which NumPy function returns the median?,np.median,median
+Which NumPy function computes the inverse of a matrix?,np.linalg.inv,inverse
+Which NumPy function computes the dot product?,np.dot,dot
+Which NumPy function creates an array of zeros?,np.zeros,zeros
+Fill in the blank: y_pred = model.___(X_test),predict,forecast
+"In statsmodels, OLS stands for ___",Ordinary Least Squares,OLS
+Which module provides OLS in statsmodels?,sm.OLS,statsmodels.OLS
+Which function in sklearn splits data into train and test sets?,train_test_split,split
+Which module provides train_test_split?,sklearn.model_selection,model_selection
+Which sklearn class implements linear regression?,LinearRegression,sklearn.linear_model.LinearRegression
+Which method returns model coefficients?,coef_,coefficients
+Which method returns model intercept?,intercept_,bias
+"In gradient descent, the parameter updated each iteration is ___",theta,weights;parameters
+The learning rate symbol in gradient descent is ___,eta,η;learning rate
+Fill in the blank: theta = theta - eta * ___,gradient,derivative
+The cost function J(θ) measures model ___,error,loss;performance
+What condition indicates gradient descent convergence?,Cost change < threshold,epsilon;ε
+Which function computes correlation coefficient?,np.corrcoef,correlation
+Which function in sklearn evaluates MAE?,mean_absolute_error,mae
+Which keyword defines a function in Python?,def,define
+Which keyword creates a class in Python?,class,define class
+What symbol is used for comments in Python?,#,hash
+Which command installs libraries?,pip install,pip
+Which Jupyter command lists variables in memory?,%whos,whos
+Which function displays a plot?,plt.show,show
+Which function plots a line graph?,plt.plot,plot
+Which function labels x-axis in matplotlib?,plt.xlabel,xlabel
+Which function labels y-axis in matplotlib?,plt.ylabel,ylabel
+Which library is imported as sm in regression lessons?,statsmodels.api,sm
+Which command activates a virtual environment in Linux?,source venv/bin/activate,activate
+Which method saves a pandas DataFrame to CSV?,to_csv,save csv
+Which method shows the first rows of a DataFrame?,head,preview
+Which method shows the shape of a DataFrame?,shape,dimensions

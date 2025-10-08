@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pop Sauce</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Écran pseudo -->
+  <div id="loginScreen">
+    <h1>Pop Sauce</h1>
+    <input type="text" id="playerName" placeholder="Entre ton pseudo..." />
+    <button id="joinButton">Rejoindre</button>
+  </div>
+
+  <!-- Lobby simple -->
+  <div id="lobby" style="display:none;">
+    <h2>Salon</h2>
+    <div id="lobbyPlayers"></div>
+    <button id="startGameButton">Lancer la partie</button>
+  </div>
+
+  <!-- Plateau de jeu -->
+  <div id="gameScreen" style="display:none;">
+    <div id="stage">
+      <!-- Colonne centrale : question -->
+      <section id="centerCol">
+        <header id="questionHeader">
+          <span id="questionTitle">Question :</span>
+          <span id="timer">20</span>
+        </header>
+
+        <!-- Carte blanche question -->
+        <div id="questionCard" class="card">
+          <p id="questionText"></p>
+        </div>
+
+        <!-- Bloc “réponse était …” -->
+        <!-- Écran de correction plein (violet), remplace la carte question -->
+        <div id="revealScreen" class="hidden">
+          <div class="revealWrapper">
+            <div class="revealLabel">La réponse était</div>
+            <div id="revealAnswer"></div>
+          </div>
+        </div>
+
+
+        <!-- Barre de saisie -->
+        <div id="answerBar">
+          <input id="answerInput" type="text" placeholder="Tape ta réponse et presse Entrée..." />
+        </div>
+      </section>
+
+      <!-- Colonne joueurs (au milieu, à droite de la question) -->
+      <aside id="playersCol">
+        <h3>Joueurs</h3>
+        <div id="gamePlayers"></div>
+      </aside>
+
+      <!-- Chat (colonne la plus à droite) -->
+      <aside id="chatCol">
+        <div id="chatMessages"></div>
+        <input id="chatInput" type="text" placeholder="Écris ici..." />
+        <button id="sendChat">Envoyer</button>
+      </aside>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>

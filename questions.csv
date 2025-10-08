@@ -1,0 +1,113 @@
+question,answer,synonyms
+Who is considered the father of modern computer science?,Alan Turing,Turing
+What test evaluates whether a machine can imitate human intelligence?,Turing Test,Imitation Game;AI test
+AI stands for what?,Artificial Intelligence,AI
+Machine Learning algorithms can do what autonomously?,Improve,learn;self-learn;enhance
+Deep Learning is a subset of what field?,Machine Learning,ML
+The Pascaline was invented by?,Blaise Pascal,Pascal
+"In automation, the Centrifugal Governor regulates what?",Speed,rotation;velocity
+Generative AI creates new what?,Content,data;text;images;music
+Linear Regression predicts a ___ variable.,Dependent,target;response;output
+"In Linear Regression, the independent variable is often called what?",Feature,predictor;input
+Equation form of simple linear regression?,y = α + βx,y=a+bx;alpha+beta
+What method minimizes the sum of squared residuals?,Ordinary Least Squares,OLS;least squares
+Residual equals observed minus what?,Predicted,estimated;expected
+The residual sum of squares is abbreviated as?,RSS,Residual Sum Squares
+What is the cost function used in linear regression?,RSS,Residual Sum Squares
+The slope parameter is symbolized by?,Beta,β
+The intercept parameter is symbolized by?,Alpha,α
+What approach finds parameters analytically?,Closed Form,analytical solution
+Gradient Descent updates parameters using what value?,Learning Rate,η;eta
+"If the learning rate is too high, what happens?",Divergence,unstable;fail
+Gradient Descent stops when the cost change is below what?,Threshold,epsilon;ε
+The function minimized in Gradient Descent is called?,Cost Function,loss function;objective
+"In convex problems, gradient descent finds the ___ minimum.",Global,true;absolute
+Multiple Linear Regression has how many predictors?,Two or more,2+;multiple
+The vector of coefficients in matrix form is symbolized as?,Beta,β
+The closed-form matrix solution is ___,(XᵗX)⁻¹Xᵗy,XTX inverse times XTy
+Adding too many features can cause what?,Overfitting,high variance
+"When predictors are highly correlated, it’s called?",Multicollinearity,collinearity
+High multicollinearity affects model ___,Stability,reliability
+The matrix of independent variables is called?,Design Matrix,X
+What does R² measure?,Explained Variance,goodness of fit;fit quality
+"If R² = 1, model explains ___ of variance.",All,100%;everything
+Adjusted R² penalizes unnecessary ___,Predictors,variables;features
+RMSE stands for?,Root Mean Squared Error,Root Mean Square Error
+MAE stands for?,Mean Absolute Error,Mean Abs Error
+Which metric penalizes large errors more?,MSE,Mean Squared Error
+Which metric is most interpretable in same unit as target?,RMSE,Root Mean Squared Error
+"When model fits noise, it is called?",Overfitting,high variance
+"When model is too simple, it is called?",Underfitting,high bias
+Bias-variance tradeoff balances ___ and ___,Bias;Variance,simplicity;complexity
+Which test checks residual independence?,Durbin–Watson,autocorrelation test
+Which assumption means constant variance of residuals?,Homoscedasticity,equal variance
+"When variance of residuals changes, it’s called?",Heteroscedasticity,non-constant variance
+Residuals should be distributed how?,Normally,Gaussian
+"If residuals show a curve, what is violated?",Linearity,nonlinear relationship
+Which plot checks residual normality?,QQ Plot,Quantile-Quantile Plot
+Pricing Optimization aims to maximize what?,Margin,profit
+Price elasticity measures relation between price and ___,Quantity,demand;orders
+Optimal price is denoted as?,Popt,P_opt;optimal price
+Optimal quantity is denoted as?,Qopt,Q_opt;optimal quantity
+Which coefficient significance test uses p-values?,t-test,student t test
+"If p < 0.05, the coefficient is ___",Significant,relevant
+What do we minimize in regression?,Error,loss;cost;residual
+Cross-validation is used to measure model ___,Generalization,performance
+R² can be derived from the ___ coefficient.,Correlation,Pearson;R
+Too many predictors can artificially inflate ___,R²,R2
+The phenomenon where R² always increases with more predictors?,Overfitting,inflation
+Adjusted R² can ___ when adding useless variables.,Decrease,drop
+question,answer,synonyms
+Who is considered the father of modern computer science?,Alan Turing,Turing
+AI stands for what?,Artificial Intelligence,AI
+Equation form of simple linear regression?,y = α + βx,y=a+bx;alpha+beta
+What method minimizes the sum of squared residuals?,Ordinary Least Squares,OLS;least squares
+What does R² measure?,Explained Variance,goodness of fit
+What phenomenon describes fitting noise instead of signal?,Overfitting,high variance
+"Fill in the blank: model = LinearRegression().___(X, y)",fit,train
+Which method makes predictions in sklearn models?,predict,forecast;estimate
+Which library provides the function r2_score?,sklearn.metrics,metrics
+Which function calculates R² score in Python?,r2_score,r2
+Which function computes Mean Squared Error?,mean_squared_error,mse
+Which function computes Root Mean Squared Error?,mean_squared_error with sqrt,rmse
+Which Python package is used for data manipulation?,pandas,pd
+Which Python package is used for numerical computation?,numpy,np
+Which Python package is used for plotting?,matplotlib,plt
+Fill in the blank: import pandas as ___,pd,pandas alias
+Fill in the blank: import numpy as ___,np,numpy alias
+Which pandas method reads Excel files?,read_excel,pd.read_excel
+Which pandas method reads CSV files?,read_csv,pd.read_csv
+Which NumPy function returns the mean?,np.mean,mean
+Which NumPy function returns the median?,np.median,median
+Which NumPy function computes the inverse of a matrix?,np.linalg.inv,inverse
+Which NumPy function computes the dot product?,np.dot,dot
+Which NumPy function creates an array of zeros?,np.zeros,zeros
+Fill in the blank: y_pred = model.___(X_test),predict,forecast
+"In statsmodels, OLS stands for ___",Ordinary Least Squares,OLS
+Which module provides OLS in statsmodels?,sm.OLS,statsmodels.OLS
+Which function in sklearn splits data into train and test sets?,train_test_split,split
+Which module provides train_test_split?,sklearn.model_selection,model_selection
+Which sklearn class implements linear regression?,LinearRegression,sklearn.linear_model.LinearRegression
+Which method returns model coefficients?,coef_,coefficients
+Which method returns model intercept?,intercept_,bias
+"In gradient descent, the parameter updated each iteration is ___",theta,weights;parameters
+The learning rate symbol in gradient descent is ___,eta,η;learning rate
+Fill in the blank: theta = theta - eta * ___,gradient,derivative
+The cost function J(θ) measures model ___,error,loss;performance
+What condition indicates gradient descent convergence?,Cost change < threshold,epsilon;ε
+Which function computes correlation coefficient?,np.corrcoef,correlation
+Which function in sklearn evaluates MAE?,mean_absolute_error,mae
+Which keyword defines a function in Python?,def,define
+Which keyword creates a class in Python?,class,define class
+What symbol is used for comments in Python?,#,hash
+Which command installs libraries?,pip install,pip
+Which Jupyter command lists variables in memory?,%whos,whos
+Which function displays a plot?,plt.show,show
+Which function plots a line graph?,plt.plot,plot
+Which function labels x-axis in matplotlib?,plt.xlabel,xlabel
+Which function labels y-axis in matplotlib?,plt.ylabel,ylabel
+Which library is imported as sm in regression lessons?,statsmodels.api,sm
+Which command activates a virtual environment in Linux?,source venv/bin/activate,activate
+Which method saves a pandas DataFrame to CSV?,to_csv,save csv
+Which method shows the first rows of a DataFrame?,head,preview
+Which method shows the shape of a DataFrame?,shape,dimensions
