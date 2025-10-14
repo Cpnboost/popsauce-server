@@ -2,67 +2,83 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Pop Sauce</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pop Sauce – Jeu multijoueur</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
-  <!-- Écran pseudo -->
+  <!-- 🎮 Écran d’accueil -->
   <div id="loginScreen">
-    <h1>Pop Sauce</h1>
-    <input type="text" id="playerName" placeholder="Entre ton pseudo..." />
+    <h1>🎮 Pop Sauce</h1>
+    <input id="playerName" placeholder="Entre ton pseudo" maxlength="20" />
     <button id="joinButton">Rejoindre</button>
   </div>
 
-  <!-- Lobby simple -->
+  <!-- 🏠 Salon / Lobby -->
   <div id="lobby" style="display:none;">
     <h2>Salon</h2>
     <div id="lobbyPlayers"></div>
-    <button id="startGameButton">Lancer la partie</button>
+
+    <button id="startGameButton">🚀 Démarrer la partie</button>
+
+    <div style="margin-top:15px;">
+      <button id="shareLinkButton">📎 Copier le lien du salon</button>
+      <p id="shareLinkDisplay" style="margin-top:8px;font-size:0.9rem;opacity:0.85;"></p>
+    </div>
   </div>
 
-  <!-- Plateau de jeu -->
+  <!-- 🎯 Écran de jeu -->
   <div id="gameScreen" style="display:none;">
     <div id="stage">
-      <!-- Colonne centrale : question -->
-      <section id="centerCol">
-        <header id="questionHeader">
-          <span id="questionTitle">Question :</span>
-          <span id="timer">20</span>
-        </header>
-
-        <!-- Carte blanche question -->
-        <div id="questionCard" class="card">
-          <p id="questionText"></p>
+      <!-- Partie centrale -->
+      <div id="centerCol">
+        <div id="questionHeader">
+          <div id="questionTitle">Question :</div>
+          <div id="timer">20</div>
         </div>
 
-        <!-- Bloc “réponse était …” -->
-        <!-- Écran de correction plein (violet), remplace la carte question -->
+        <!-- Carte de question -->
+        <div id="questionCard" class="card">
+          <p id="questionText">Question ici...</p>
+        </div>
+
+        <!-- Révélation de la réponse -->
         <div id="revealScreen" class="hidden">
           <div class="revealWrapper">
-            <div class="revealLabel">La réponse était</div>
-            <div id="revealAnswer"></div>
+            <p class="revealLabel">La réponse était :</p>
+            <p id="revealAnswer"></p>
           </div>
         </div>
 
-
-        <!-- Barre de saisie -->
+        <!-- Réponse joueur -->
         <div id="answerBar">
-          <input id="answerInput" type="text" placeholder="Tape ta réponse et presse Entrée..." />
+          <input id="answerInput" placeholder="Tape ta réponse et appuie sur Entrée" />
         </div>
-      </section>
+      </div>
 
-      <!-- Colonne joueurs (au milieu, à droite de la question) -->
-      <aside id="playersCol">
+      <!-- Liste des joueurs -->
+      <div id="playersCol">
         <h3>Joueurs</h3>
         <div id="gamePlayers"></div>
-      </aside>
+      </div>
 
-      <!-- Chat (colonne la plus à droite) -->
-      <aside id="chatCol">
+      <!-- Chat -->
+      <div id="chatCol">
         <div id="chatMessages"></div>
-        <input id="chatInput" type="text" placeholder="Écris ici..." />
+        <input id="chatInput" placeholder="Écris un message..." />
         <button id="sendChat">Envoyer</button>
-      </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🏆 Écran du gagnant -->
+  <div id="winnerScreen" style="display:none;">
+    <div style="text-align:center; margin-top:80px;">
+      <h1>🏆 Victoire !</h1>
+      <img id="winnerAvatar" src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png" width="90" style="margin:10px;">
+      <h2 id="winnerName"></h2>
+      <p id="winnerScore" style="font-size:1.3rem;"></p>
     </div>
   </div>
 
