@@ -1,6 +1,6 @@
 const socket = io();
 
-/* DOM */
+/* === DOM === */
 const loginScreen = document.getElementById("loginScreen");
 const lobby = document.getElementById("lobby");
 const gameScreen = document.getElementById("gameScreen");
@@ -26,12 +26,13 @@ const sendChatBtn = document.getElementById("sendChat");
 
 let myId = null;
 let foundSet = new Set();
-let lastAttempts = {}; // mémorise la dernière réponse pour chaque joueur
+let lastAttempts = {};
 
-/* Connexion */
-socket.on("connect", () => (myId = socket.id));
+socket.on("connect", () => {
+  myId = socket.id;
+  console.log("✅ Connecté au serveur Render");
+});
 
-/* Rejoindre */
 joinButton.addEventListener("click", () => {
   const name = playerNameInput.value.trim();
   if (!name) return alert("Entre ton pseudo !");
@@ -51,8 +52,8 @@ socket.on("updatePlayers", (players) => {
 
 startGameButton.addEventListener("click", () => socket.emit("startGame"));
 
-/* Nouveau tour */
 socket.on("newQuestion", (q) => {
+  console.log("📩 Question reçue :", q);
   lobby.style.display = "none";
   gameScreen.style.display = "block";
 
@@ -60,6 +61,7 @@ socket.on("newQuestion", (q) => {
   revealScreen.classList.add("hidden");
 
   questionText.textContent = q.question;
+
   answerInput.disabled = false;
   answerInput.value = "";
   answerInput.focus();
@@ -69,15 +71,11 @@ socket.on("newQuestion", (q) => {
   lastAttempts = {};
   clearFoundHighlights();
 
-  document.querySelectorAll(".lastAttempt").forEach(el => {
-    el.textContent = "";
-  });
+  document.querySelectorAll(".lastAttempt").forEach((el) => (el.textContent = ""));
 });
 
-/* Timer */
 socket.on("timerUpdate", (t) => (timerEl.textContent = t));
 
-/* Correction (affiche aussi toutes les tentatives finales) */
 socket.on("showAnswer", (answer) => {
   answerInput.disabled = true;
   questionCard.classList.add("hidden");
@@ -85,57 +83,42 @@ socket.on("showAnswer", (answer) => {
   revealScreen.classList.remove("hidden");
   revealAnswer.textContent = answer || "—";
 
-  // Montre toutes les dernières tentatives
   Object.entries(lastAttempts).forEach(([id, text]) => {
     const el = document.getElementById(`attempt-${id}`);
     if (el) {
       el.textContent = text;
       el.style.display = "inline";
-      el.style.opacity = "1";
       el.style.color = "#4D2F57";
       el.style.fontStyle = "italic";
-      el.style.fontWeight = "400";
     }
   });
 });
 
-/* Un joueur a trouvé */
 socket.on("playerFound", (data) => {
   foundSet = new Set(data.found);
   updateScores(data.scores);
   applyFoundHighlights();
 });
 
-/* Mauvaise tentative */
 socket.on("wrongAttempt", (data) => {
-  console.log("❌ mauvaise tentative reçue :", data);
   lastAttempts[data.playerId] = data.attempt;
-
   const el = document.getElementById(`attempt-${data.playerId}`);
   if (!foundSet.has(data.playerId) && el) {
     el.textContent = data.attempt;
-    el.style.display = "inline";   // ✅ garantit affichage
-    el.style.opacity = "1";        // ✅ supprime l’effet invisible
-    el.style.color = "#4D2F57";    // violet foncé lisible
+    el.style.display = "inline";
+    el.style.color = "#4D2F57";
     el.style.fontStyle = "italic";
-    el.style.fontWeight = "400";
   }
 });
 
-/* Envoi d'une réponse */
 answerInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     const val = answerInput.value.trim();
-    if (val) {
-      console.log("Tentative envoyée :", val);
-      socket.emit("answer", val);
-      socket.emit("attempt", val);
-    }
+    if (val) socket.emit("answer", val);
     answerInput.value = "";
   }
 });
 
-/* Chat */
 sendChatBtn.addEventListener("click", sendChat);
 chatInput.addEventListener("keydown", (e) => e.key === "Enter" && sendChat());
 socket.on("chatMessage", (msg) => {
@@ -151,7 +134,6 @@ function sendChat() {
   chatInput.value = "";
 }
 
-/* Affichage des joueurs */
 function renderLobby(players) {
   lobbyPlayers.innerHTML = "";
   players.forEach((p) => {
@@ -176,7 +158,6 @@ function renderGamePlayers(players) {
   });
 }
 
-/* Structure d'une carte joueur */
 function cardInner(p) {
   return `
     <div class="playerCardInner">
@@ -192,8 +173,6 @@ function cardInner(p) {
   `;
 }
 
-
-/* Scores */
 function updateScores(scores) {
   Object.entries(scores).forEach(([id, sc]) => {
     const el = document.querySelector(`#player-${id} .playerScoreMini`);
@@ -201,7 +180,6 @@ function updateScores(scores) {
   });
 }
 
-/* Surbrillance joueurs */
 function clearFoundHighlights() {
   document.querySelectorAll("#gamePlayers .playerCard").forEach((el) =>
     el.classList.remove("found")
