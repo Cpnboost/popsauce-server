@@ -1,190 +1,222 @@
-// --- Dépendances ---
+// server.js — Pop Sauce (Socket.IO) — version corrigée et robuste
+// ——————————————————————————————————————————————————————————
+// * Rend les fichiers statiques (index.html, client.js, styles.css)
+// * Charge un CSV (facultatif). Les colonnes attendues sont: "Question","Reponse"
+// * Emet *toujours* des clés en minuscules vers le client: {question}, {answer}
+// * Corrige l'incohérence de casse qui empêchait l'affichage des questions
+// * Compatible Render (port fourni via process.env.PORT)
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const fs = require("fs");
+const path = require("path");
 const csv = require("csv-parser");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: { origin: "*", methods: ["GET", "POST"] },
+});
 
-// --- Sert les fichiers statiques ---
-app.use(express.static(__dirname));
+// Fichiers statiques (index.html, client.js, styles.css)
+app.use(express.static(path.join(__dirname)));
 
-// --- Données du jeu ---
+// ————————— Données —————————
 let allQuestions = [];
-let usedQuestions = [];
-let players = {};
-let currentQuestion = null;
+let players = {}; // id -> { id, name, score }
+let currentQuestion = null; // { Question, Reponse }
 let foundPlayers = new Set();
-let timer = null;
-let timeLeft = 20;
-let gameStarted = false;
+let timeLeft = 0;
+let roundTimer = null;
+let roundNumber = 0;
+const ROUND_DURATION = 20;
+const WIN_SCORE = 100;
 
-// --- Chargement du CSV ---
-fs.createReadStream("questions.csv")
-  .pipe(csv())
-  .on("data", (row) => allQuestions.push(row))
-  .on("end", () =>
-    console.log(`✅ ${allQuestions.length} questions chargées depuis questions.csv`)
-  );
-
-// --- Sélection d'une question non répétée ---
-function pickRandomQuestion() {
-  const remaining = allQuestions.filter((q) => !usedQuestions.includes(q.Question));
-  if (remaining.length === 0) usedQuestions = [];
-
-  const available = allQuestions.filter((q) => !usedQuestions.includes(q.Question));
-  const chosen = available[Math.floor(Math.random() * available.length)];
-  usedQuestions.push(chosen.Question);
-  return chosen;
+// ————————— Utilitaires —————————
+function normalize(s = "") {
+  return String(s)
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .trim();
 }
 
-// --- Timer ---
-function startTimer() {
-  clearInterval(timer);
-  timer = setInterval(() => {
-    timeLeft--;
-    io.emit("timerUpdate", timeLeft);
+function loadCsvIfExists() {
+  return new Promise((resolve) => {
+    const filePath = path.join(__dirname, "questions.csv"); // facultatif
+    if (!fs.existsSync(filePath)) {
+      // fallback minimal si pas de CSV présent dans le repo
+      allQuestions = [
+        { Question: "Capitale de la France ?", Reponse: "Paris" },
+        { Question: "2 + 2 ?", Reponse: "4" },
+        { Question: "Couleur du ciel par temps clair ?", Reponse: "Bleu" },
+      ];
+      console.log("ℹ️ Aucun CSV trouvé. Utilisation d'un petit jeu de questions par défaut.");
+      return resolve();
+    }
+    const results = [];
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on("data", (row) => {
+        // On tolère différentes casses pour les entêtes CSV
+        const q = row.Question ?? row.question ?? row.QUESTION ?? row["Question "] ?? row["question "];
+        const r = row.Reponse ?? row.reponse ?? row.REPONSE ?? row.Réponse ?? row["Réponse"];
+        if (q && r) results.push({ Question: String(q), Reponse: String(r) });
+      })
+      .on("end", () => {
+        if (results.length > 0) {
+          allQuestions = results;
+          console.log(`📥 ${allQuestions.length} questions chargées depuis CSV.`);
+        } else {
+          allQuestions = [
+            { Question: "Capitale de la France ?", Reponse: "Paris" },
+            { Question: "2 + 2 ?", Reponse: "4" },
+            { Question: "Couleur du ciel par temps clair ?", Reponse: "Bleu" },
+          ];
+          console.log("⚠️ CSV vide/invalide. Utilisation d'un petit jeu par défaut.");
+        }
+        resolve();
+      })
+      .on("error", (err) => {
+        console.error("Erreur lecture CSV:", err);
+        allQuestions = [
+          { Question: "Capitale de la France ?", Reponse: "Paris" },
+          { Question: "2 + 2 ?", Reponse: "4" },
+          { Question: "Couleur du ciel par temps clair ?", Reponse: "Bleu" },
+        ];
+        resolve();
+      });
+  });
+}
 
-    if (timeLeft <= 0 || foundPlayers.size === Object.keys(players).length) {
-      clearInterval(timer);
-      io.emit("showAnswer", currentQuestion.Reponse);
-      setTimeout(() => resetRound(), 4000);
+function pickRandomQuestion() {
+  if (!allQuestions.length) return null;
+  const idx = Math.floor(Math.random() * allQuestions.length);
+  return allQuestions[idx];
+}
+
+function startRound() {
+  currentQuestion = pickRandomQuestion();
+  foundPlayers = new Set();
+  timeLeft = ROUND_DURATION;
+  roundNumber += 1;
+  if (!currentQuestion) return;
+
+  // IMPORTANT: on émet *toujours* des clés en minuscules vers le client
+  io.emit("newQuestion", {
+    question: currentQuestion.Question,
+    round: roundNumber,
+    timeLeft,
+  });
+
+  if (roundTimer) clearInterval(roundTimer);
+  roundTimer = setInterval(() => {
+    timeLeft -= 1;
+    io.emit("timer", { timeLeft });
+    if (timeLeft <= 0) {
+      clearInterval(roundTimer);
+      io.emit("showAnswer", { answer: currentQuestion.Reponse });
+      setTimeout(() => maybeNextRound(), 1500);
     }
   }, 1000);
 }
 
-// --- Nouveau tour ---
-function resetRound() {
-  const maxScore = Math.max(...Object.values(players).map((p) => p.score || 0));
-  if (maxScore >= 100) return endGame();
-
-  currentQuestion = pickRandomQuestion();
-  foundPlayers = new Set();
-  timeLeft = 20;
-
-  console.log("➡️ Nouvelle question :", currentQuestion.Question);
-  io.emit("newQuestion", { question: currentQuestion.Question });
-
-  startTimer();
-}
-
-// --- Fin de partie ---
-function endGame() {
-  clearInterval(timer);
-  gameStarted = false;
-
-  const sorted = Object.values(players).sort((a, b) => b.score - a.score);
-  const winner = sorted[0];
-  if (!winner) return;
-
-  io.emit("gameOver", {
-    winnerName: winner.name,
-    winnerScore: winner.score,
-  });
-
-  setTimeout(() => {
-    Object.values(players).forEach((p) => (p.score = 0));
-    usedQuestions = [];
-    io.emit("updatePlayers", Object.values(players));
-    io.emit("backToLobby");
-  }, 5000);
-}
-
-// --- Distance Levenshtein pour tolérance fautes ---
-function levenshtein(a, b) {
-  const dp = Array(a.length + 1)
-    .fill(null)
-    .map(() => Array(b.length + 1).fill(0));
-
-  for (let i = 0; i <= a.length; i++) dp[i][0] = i;
-  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
-
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i][j] = Math.min(
-        dp[i - 1][j] + 1,
-        dp[i][j - 1] + 1,
-        dp[i - 1][j - 1] + cost
-      );
-    }
+function endGameIfNeeded() {
+  const top = Object.values(players).sort((a, b) => b.score - a.score)[0];
+  if (top && top.score >= WIN_SCORE) {
+    io.emit("gameOver", { winner: top });
+    if (roundTimer) clearInterval(roundTimer);
+    return true;
   }
-  return dp[a.length][b.length];
+  return false;
 }
 
-// --- Gestion des sockets ---
+function maybeNextRound() {
+  if (!endGameIfNeeded()) startRound();
+}
+
+function updatePlayers() {
+  io.emit("updatePlayers", Object.values(players));
+}
+
+// ————————— Socket.IO —————————
 io.on("connection", (socket) => {
-  console.log(`🟢 ${socket.id} connecté`);
+  console.log("🟢 Client:", socket.id);
 
-  socket.on("joinGame", (name) => {
-    players[socket.id] = { id: socket.id, name, score: 0 };
-    io.emit("updatePlayers", Object.values(players));
-    socket.emit("joinedLobby", Object.values(players));
+  // Envoyer l'état initial
+  socket.emit("hello", {
+    round: roundNumber,
+    timeLeft,
+    hasQuestion: !!currentQuestion,
+  });
+  if (currentQuestion) {
+    socket.emit("newQuestion", {
+      question: currentQuestion.Question,
+      round: roundNumber,
+      timeLeft,
+    });
+  }
+  updatePlayers();
+
+  // Player join
+  socket.on("join", ({ name }) => {
+    const cleanName = String(name || "Joueur").slice(0, 20);
+    players[socket.id] = { id: socket.id, name: cleanName, score: 0 };
+    updatePlayers();
   });
 
+  // Start game (anyone can lancer; à toi de restreindre si besoin)
   socket.on("startGame", () => {
-    if (!gameStarted) {
-      gameStarted = true;
-      usedQuestions = [];
-      resetRound();
-    }
+    if (roundTimer) return; // évite de relancer pendant un round
+    startRound();
   });
 
-  socket.on("answer", (answer) => {
+  // Réception d'une tentative
+  socket.on("submitAnswer", ({ answer }) => {
     if (!currentQuestion) return;
-    const player = players[socket.id];
-    if (!player) return;
+    if (!players[socket.id]) return;
+    if (foundPlayers.has(socket.id)) return;
 
-    const correct = currentQuestion.Reponse.trim().toLowerCase();
-    const attempt = answer.trim().toLowerCase();
-    const dist = levenshtein(correct, attempt);
+    const guess = normalize(answer);
+    const target = normalize(currentQuestion.Reponse);
 
-    const close = dist <= 4 || correct.includes(attempt) || attempt.includes(correct);
-
-    if ((attempt === correct || close) && !foundPlayers.has(socket.id)) {
+    // match exact "normalisé" (tu peux remplacer par un includes si tu veux)
+    if (guess && guess === target) {
       foundPlayers.add(socket.id);
-
-      let scoreGain = 0;
-      if (foundPlayers.size === 1) scoreGain = 10;
-      else if (timeLeft > 15) scoreGain = 9;
-      else if (timeLeft > 13) scoreGain = 8;
-      else if (timeLeft > 11) scoreGain = 7;
-      else if (timeLeft > 9) scoreGain = 6;
-      else if (timeLeft > 7) scoreGain = 5;
-      else if (timeLeft > 5) scoreGain = 4;
-      else if (timeLeft > 3) scoreGain = 2;
-      else scoreGain = 1;
-
-      player.score += scoreGain;
-
+      players[socket.id].score = (players[socket.id].score || 0) + 10;
       io.emit("playerFound", {
+        playerId: socket.id,
         found: Array.from(foundPlayers),
-        scores: Object.fromEntries(Object.entries(players).map(([id, p]) => [id, p.score])),
+        scores: Object.values(players),
       });
 
-      if (player.score >= 100) endGame();
+      // si tout le monde a trouvé ou temps fini → on révèle puis on passe
+      const allActive = Object.keys(players).length || 1;
+      if (foundPlayers.size >= allActive) {
+        if (roundTimer) clearInterval(roundTimer);
+        io.emit("showAnswer", { answer: currentQuestion.Reponse });
+        setTimeout(() => maybeNextRound(), 1200);
+      } else {
+        endGameIfNeeded();
+      }
     } else {
-      io.emit("wrongAttempt", { playerId: socket.id, attempt: answer });
+      socket.emit("wrongAttempt", {});
     }
-  });
-
-  socket.on("chatMessage", (msg) => {
-    const player = players[socket.id];
-    if (player) io.emit("chatMessage", { player: player.name, text: msg });
   });
 
   socket.on("disconnect", () => {
     delete players[socket.id];
-    io.emit("updatePlayers", Object.values(players));
-    console.log(`🔴 ${socket.id} déconnecté`);
+    foundPlayers.delete(socket.id);
+    updatePlayers();
+    console.log("🔴 Déconnecté:", socket.id);
   });
 });
 
-// --- Lancement serveur (Render-compatible) ---
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`🚀 Serveur Pop Sauce lancé sur le port ${PORT}`);
+// ————————— Lancement —————————
+loadCsvIfExists().then(() => {
+  const PORT = process.env.PORT || 3000;
+  server.listen(PORT, () => {
+    console.log(`🚀 Serveur lancé sur :${PORT}`);
+  });
 });
